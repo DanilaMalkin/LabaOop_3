@@ -164,6 +164,8 @@ protected:
     double angle;
     double lastSpeedUp;
     double lastAngle;
+    double xPredict;
+    double yPredict;
 
 };
 
@@ -186,6 +188,12 @@ public:
 
     double getLastTime(){
         return lastTime;
+    }
+    double getXPredict(){
+        return xPredict;
+    }
+    double getYPredict(){
+        return yPredict;
     }
     void setSpeedUp(double valueSpeedUp,double currentTime) {
         upDateInfo(currentTime,valueSpeedUp,angle);
@@ -216,6 +224,23 @@ public:
         const vector<Command>& commands = commandQueue.getCommands();
         for (const Command& command : commands) {
             upDateInfo(command.getTime(), command.getSpeedUp(), command.getAngle());
+        }
+    }
+
+    void predictXY(double futureTime) {
+
+    
+        if (futureTime > lastTime) {
+        
+            double runTime = futureTime - lastTime;
+        
+            double runDistance = speed * runTime + 0.5 * speedUp * runTime * runTime;
+            xPredict = x + runDistance * cos(angle * M_PI / 180);
+            yPredict = y + runDistance * sin(angle * M_PI / 180);
+
+        } 
+        else {
+            cout << "Ошибка: неверный ввод времени" << endl;
         }
     }
 
@@ -343,6 +368,9 @@ int main() {
     testCommand.executeCommands();
     assert(testCommand.getAngle()==90&&"команды не верно передались"); 
     testCommand.printCar();
+    testCommand.predictXY(30);
+    assert(testCommand.getYPredict()==4000&&"не верно сработал метод предсказывания координат"); 
+
 
 
     cout << "тестирование прошло успешно!" << endl;
